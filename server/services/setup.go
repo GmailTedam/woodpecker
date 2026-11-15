@@ -28,8 +28,6 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
-	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption"
-	encryptedStore "go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/wrapper/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/registry"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/secret"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
@@ -56,24 +54,12 @@ func setupRegistryService(store store.Store, dockerConfig, endpoint string, incl
 	return service
 }
 
-func setupSecretService(c *cli.Command, store store.Store, endpoint string, client *utils.Client, includeNetrc bool) (secret.Service, error) {
-	var secretStore model.SecretStore = store
-
-	if c.IsSet("encryption-raw-key") || c.IsSet("encryption-tink-keyset") || c.Bool("encryption-disable-flag") {
-		encryptedSecretStore := encryptedStore.NewSecretStore(store)
-		err := encryption.Encryption(c, store).WithClient(encryptedSecretStore).Build()
-		if err != nil {
-			return nil, fmt.Errorf("could not create encryption service: %w", err)
-		}
-		secretStore = encryptedSecretStore
-		log.Info().Msg("database secret store encryption configured successfully")
-	}
-
+func setupSecretService(store store.Store, endpoint string, client *utils.Client, includeNetrc bool) secret.Service {
 	if endpoint != "" {
-		return secret.NewCombined(secret.NewDB(secretStore), secret.NewHTTP(endpoint, client, includeNetrc)), nil
+		return secret.NewCombined(secret.NewDB(store), secret.NewHTTP(endpoint, client, includeNetrc))
 	}
 
-	return secret.NewDB(secretStore), nil
+	return secret.NewDB(store)
 }
 
 func setupConfigService(c *cli.Command, client *utils.Client) (config.Service, error) {
@@ -123,7 +109,7 @@ func setupSignatureKeys(_store store.Store) (ed25519.PrivateKey, crypto.PublicKe
 }
 
 func setupForgeService(c *cli.Command, _store store.Store) error {
-	_forge, err := _store.ForgeGet(1)
+	_forge, err := _store.ForgeGet(model.PrimaryForgeID)
 	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		return err
 	}

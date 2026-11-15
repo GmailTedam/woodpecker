@@ -30,6 +30,7 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 	"golang.org/x/oauth2"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
@@ -84,9 +85,11 @@ func (g *GitLab) Name() string {
 	return "gitlab"
 }
 
-// URL returns the root url of a configured forge.
-func (g *GitLab) URL() string {
-	return g.url
+func (g *GitLab) Close() error { return nil }
+
+// Config returns the metadata of the configured forge.
+func (g *GitLab) Config() metadata.Forge {
+	return metadata.Forge{Type: g.Name(), URL: g.url, Host: common.HostFromURL(g.url)}
 }
 
 func (g *GitLab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
@@ -421,8 +424,8 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 		Recursive: new(false),
 	}
 
-	for i := 1; true; i++ {
-		opts.Page = 1
+	for page := int64(1); ; page++ {
+		opts.Page = page
 		batch, _, err := client.Repositories.ListTree(_repo.ID, opts, gitlab.WithContext(ctx))
 		if err != nil {
 			return nil, err
@@ -660,7 +663,7 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (g *GitLab) Hook(ctx context.Context, req *http.Request, _ string) (*model.Repo, *model.Pipeline, error) {
 	defer req.Body.Close()
 	payload, err := io.ReadAll(req.Body)
 	if err != nil {
@@ -848,14 +851,22 @@ func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *mode
 		return nil, err
 	}
 
-	changes, _, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeID, &gitlab.ListMergeRequestDiffsOptions{}, gitlab.WithContext(ctx))
-	if err != nil {
-		return nil, err
+	files := make([]string, 0, defaultPerPage*2)
+	diffOpts := &gitlab.ListMergeRequestDiffsOptions{
+		PerPage: defaultPerPage,
 	}
-
-	files := make([]string, 0, len(changes)*2)
-	for _, file := range changes {
-		files = append(files, file.NewPath, file.OldPath)
+	for {
+		changes, resp, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeID, diffOpts, gitlab.WithContext(ctx))
+		if err != nil {
+			return nil, err
+		}
+		for _, file := range changes {
+			files = append(files, file.NewPath, file.OldPath)
+		}
+		if resp == nil || resp.NextPage == 0 {
+			break
+		}
+		diffOpts.Page = resp.NextPage
 	}
 	pipeline.ChangedFiles = utils.DeduplicateStrings(files)
 
@@ -942,7 +953,16 @@ func (g *GitLab) loadCommitFromSHA(ctx context.Context, tmpRepo *model.Repo, pip
 		return nil, err
 	}
 
-	pipeline.Author = cm.AuthorName
+	// For annotated tags `sha` is the tag object's own SHA; the commits
+	// endpoint resolves it to the tagged commit. Record that commit so
+	// CI_COMMIT_SHA matches the commit GitLab shows on the tag page.
+	pipeline.Commit = cm.ID
+
+	// Do not set pipeline.Author from the git commit metadata here: it is
+	// controlled by whoever made the commit and would overwrite the author
+	// taken from the authenticated webhook (convertTagHook sets it to
+	// hook.UserUsername). Trusting it lets a pusher spoof an
+	// ApprovalAllowedUsers entry and skip approval (CVE-2026-58370).
 	pipeline.Email = cm.AuthorEmail
 	pipeline.Message = cm.Message
 	pipeline.Timestamp = cm.CommittedDate.Unix()
