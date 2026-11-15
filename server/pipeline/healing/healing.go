@@ -67,7 +67,7 @@ func DiagnoseAndHeal(ctx context.Context, _store store.Store, repo *model.Repo, 
 	}
 
 	// 1. Locate the failed workflow and step
-	failedStep, logExcerpt := findFailedStepAndLogs(_store, failedPipeline)
+	failedStep, logExcerpt := findFailedStepAndLogs(ctx, _store, failedPipeline)
 	if failedStep == nil {
 		logger.Debug().Msg("Self-healing: could not identify specific failed step")
 		return
@@ -117,7 +117,7 @@ func DiagnoseAndHeal(ctx context.Context, _store store.Store, repo *model.Repo, 
 }
 
 // findFailedStepAndLogs scans pipeline steps to find the step that failed and extracts its tail log.
-func findFailedStepAndLogs(_store store.Store, p *model.Pipeline) (*model.Step, string) {
+func findFailedStepAndLogs(ctx context.Context, _store store.Store, p *model.Pipeline) (*model.Step, string) {
 	steps, err := _store.StepList(p.ID)
 	if err != nil || len(steps) == 0 {
 		return nil, ""
@@ -136,7 +136,7 @@ func findFailedStepAndLogs(_store store.Store, p *model.Pipeline) (*model.Step, 
 	}
 
 	// Fetch log entries
-	logEntries, err := server.Config.Services.LogStore.LogFind(targetStep)
+	logEntries, err := server.Config.Services.LogStore.LogFind(ctx, targetStep)
 	if err != nil || len(logEntries) == 0 {
 		return targetStep, ""
 	}

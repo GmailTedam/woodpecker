@@ -6,7 +6,7 @@
   "passed": 10,
   "failed": 0,
   "skipped": 0,
-  "executed_at": "2026-10-25T13:13:15.461898+00:00",
+  "executed_at": "2026-11-15T21:02:35.893217+00:00",
   "results": [
     {
       "use_case_id": "healthci_svc_oom_autoscale_0001",
@@ -39,7 +39,7 @@
         "symphonix-healing-llm:11434"
       ],
       "failures": [],
-      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "executed_at": "2026-11-15T21:02:35.893217+00:00",
       "source": "symphonix-healthci-real-service-runner",
       "environment": {
         "runner": "Repeatable Real-Service E2E Harness",
@@ -80,7 +80,7 @@
         "symphonix-healing-llm:11434"
       ],
       "failures": [],
-      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "executed_at": "2026-11-15T21:02:35.893217+00:00",
       "source": "symphonix-healthci-real-service-runner",
       "environment": {
         "runner": "Repeatable Real-Service E2E Harness",
@@ -121,7 +121,7 @@
         "symphonix-healing-llm:11434"
       ],
       "failures": [],
-      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "executed_at": "2026-11-15T21:02:35.893217+00:00",
       "source": "symphonix-healthci-real-service-runner",
       "environment": {
         "runner": "Repeatable Real-Service E2E Harness",
@@ -162,7 +162,7 @@
         "symphonix-healing-llm:11434"
       ],
       "failures": [],
-      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "executed_at": "2026-11-15T21:02:35.893217+00:00",
       "source": "symphonix-healthci-real-service-runner",
       "environment": {
         "runner": "Repeatable Real-Service E2E Harness",
@@ -203,7 +203,7 @@
         "symphonix-healing-llm:11434"
       ],
       "failures": [],
-      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "executed_at": "2026-11-15T21:02:35.893217+00:00",
       "source": "symphonix-healthci-real-service-runner",
       "environment": {
         "runner": "Repeatable Real-Service E2E Harness",
@@ -244,7 +244,7 @@
         "symphonix-healing-llm:11434"
       ],
       "failures": [],
-      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "executed_at": "2026-11-15T21:02:35.893217+00:00",
       "source": "symphonix-healthci-real-service-runner",
       "environment": {
         "runner": "Repeatable Real-Service E2E Harness",
@@ -285,7 +285,7 @@
         "symphonix-healing-llm:11434"
       ],
       "failures": [],
-      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "executed_at": "2026-11-15T21:02:35.893217+00:00",
       "source": "symphonix-healthci-real-service-runner",
       "environment": {
         "runner": "Repeatable Real-Service E2E Harness",
@@ -326,7 +326,7 @@
         "symphonix-healing-llm:11434"
       ],
       "failures": [],
-      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "executed_at": "2026-11-15T21:02:35.893217+00:00",
       "source": "symphonix-healthci-real-service-runner",
       "environment": {
         "runner": "Repeatable Real-Service E2E Harness",
@@ -367,7 +367,7 @@
         "symphonix-healing-llm:11434"
       ],
       "failures": [],
-      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "executed_at": "2026-11-15T21:02:35.893217+00:00",
       "source": "symphonix-healthci-real-service-runner",
       "environment": {
         "runner": "Repeatable Real-Service E2E Harness",
@@ -408,7 +408,7 @@
         "symphonix-healing-llm:11434"
       ],
       "failures": [],
-      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "executed_at": "2026-11-15T21:02:35.893217+00:00",
       "source": "symphonix-healthci-real-service-runner",
       "environment": {
         "runner": "Repeatable Real-Service E2E Harness",
